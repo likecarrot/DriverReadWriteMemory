@@ -1,0 +1,87 @@
+;
+; DriverReadWriteMemory.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=Sample ; TODO: edit Class
+ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171} ; TODO: edit ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=DriverReadWriteMemory.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+PnpLockDown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+DriverReadWriteMemory_Device_CoInstaller_CopyFiles = 11
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=SampleClassReg
+
+[SampleClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+DriverReadWriteMemory.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%DriverReadWriteMemory.DeviceDesc%=DriverReadWriteMemory_Device, Root\DriverReadWriteMemory ; TODO: edit hw-id
+
+[DriverReadWriteMemory_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+DriverReadWriteMemory.sys
+
+;-------------- Service installation
+[DriverReadWriteMemory_Device.NT.Services]
+AddService = DriverReadWriteMemory,%SPSVCINST_ASSOCSERVICE%, DriverReadWriteMemory_Service_Inst
+
+; -------------- DriverReadWriteMemory driver install sections
+[DriverReadWriteMemory_Service_Inst]
+DisplayName    = %DriverReadWriteMemory.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\DriverReadWriteMemory.sys
+
+;
+;--- DriverReadWriteMemory_Device Coinstaller installation ------
+;
+
+[DriverReadWriteMemory_Device.NT.CoInstallers]
+AddReg=DriverReadWriteMemory_Device_CoInstaller_AddReg
+CopyFiles=DriverReadWriteMemory_Device_CoInstaller_CopyFiles
+
+[DriverReadWriteMemory_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[DriverReadWriteMemory_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[DriverReadWriteMemory_Device.NT.Wdf]
+KmdfService =  DriverReadWriteMemory, DriverReadWriteMemory_wdfsect
+[DriverReadWriteMemory_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ClassName="Samples" ; TODO: edit ClassName
+DiskName = "DriverReadWriteMemory Installation Disk"
+DriverReadWriteMemory.DeviceDesc = "DriverReadWriteMemory Device"
+DriverReadWriteMemory.SVCDESC = "DriverReadWriteMemory Service"
